@@ -1,0 +1,12 @@
+Metric	Value
+Input Reads	19236909
+Mapped Reads	18861000
+Unmapped Reads	261818
+Unique Mapped Reads	16274037
+Multiple Mapped Reads	2586963
+Mapping Rate	98.04589708253026
+Dedup Mapped Reads	9855574
+Dedup Unmapped Reads	0
+Dedup Uniquely Mapped Reads	8431476
+Dedup Multi Mapped Reads	1424098
+Dedup Mapped Reads Rate	51.23262786136795
