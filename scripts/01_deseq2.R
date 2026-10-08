@@ -67,6 +67,15 @@ unwanted_samples <- smpl_ls$sample
 extracted_numbers <- as.numeric(sub("^[^_]+_([0-9]+)_.*$", "\\1", colnames(counts)))
 counts_clean <- counts[, !extracted_numbers %in% unwanted_samples]
 
+# filter low-count genes
+print("Filtering low-count genes (at least one sample has 10 or more reads)")
+
+keep <- rowSums(counts_clean >= 10) >= 1
+print(paste("Genes before filtering:", nrow(counts_clean)))
+print(paste("Genes after filtering: ", sum(keep)))
+
+counts_clean <- counts_clean[keep, , drop = FALSE]
+
 
 # rename samples to treatment groups
 print("Renaming samples to treatment groups")
@@ -203,9 +212,43 @@ summary(res_tum)
 write.csv(annotate_results(res_tum, dds),
           "data/nt_v_t_annotated_results.csv", row.names = FALSE)
 
+# running one-way ANOVA with multiple comparisons
+print("running one-way ANOVA with multiple comparisons")
 
+dds_grp <- DESeqDataSetFromMatrix(
+  countData = deseq_counts,
+  colData   = deseq_metadata,
+  design    = ~ 0 + Group + Batch 
+)
 
+# fit the model
+mcols(dds_grp) <- DataFrame(ensembl_ids)
+dds_grp <- DESeq(dds_grp)
+resultsNames(dds_grp)
 
+dds_lrt <- DESeq(dds_grp, test = "LRT", reduced = ~ Batch)
+res_omni <- results(dds_lrt)
+summary(res_omni)
 
+# run pairwise post-hoc comparisons
+contrasts_tvn <- list(
+  Chow_Control = c("Group", "Tumor_Chow_Control", "NonTumor_Chow_Control"),
+  Chow_ABAT    = c("Group", "Tumor_Chow_ABAT",    "NonTumor_Chow_ABAT"),
+  HFD_Control  = c("Group", "Tumor_HFD_Control",  "NonTumor_HFD_Control"),
+  HFD_ABAT     = c("Group", "Tumor_HFD_ABAT",     "NonTumor_HFD_ABAT")
+)
+
+res_list <- lapply(contrasts_tvn, function(cn) results(dds_grp, contrast = cn))
+
+# multiple comparisons
+n_contrasts <- length(res_list)
+
+for (nm in names(res_list)) {
+  r <- res_list[[nm]]
+  r$padj_all <- pmin(r$padj * n_contrasts, 1)
+  res_list[[nm]] <- r
+  write.csv(annotate_results(r, dds_grp),
+            paste0("data/tumor_v_nontumor_", nm, ".csv"), row.names = FALSE)
+}
 
 

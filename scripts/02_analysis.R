@@ -8,28 +8,4 @@
 
 
 # load necessary libraries
-print("Loading libraries")
 
-if (!require("BiocManager", quietly = TRUE)) 
-  install.packages("BiocManager", repos = "https://cloud.r-project.org")
-
-if (!require("DESeq2", quietly = TRUE)) 
-  BiocManager::install("DESeq2", update = FALSE, ask = FALSE)
-
-if (!require("pacman", quietly = TRUE)) {
-  install.packages("pacman", repos = "https://cloud.r-project.org")
-}
-
-pacman::p_load(DESeq2)
-
-# create Deseq object
-dds <- DESeqDataSetFromMatrix(
-  countData = deseq_counts,
-  colData = deseq_metadata,
-  design = ~ Diet + ASO
-)
-
-
-mcols(dds) <- DataFrame(gene_annotations)
-
-print(dds)
