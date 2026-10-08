@@ -22,3 +22,14 @@ if (!require("pacman", quietly = TRUE)) {
 
 pacman::p_load(DESeq2)
 
+# create Deseq object
+dds <- DESeqDataSetFromMatrix(
+  countData = deseq_counts,
+  colData = deseq_metadata,
+  design = ~ Diet + ASO
+)
+
+
+mcols(dds) <- DataFrame(gene_annotations)
+
+print(dds)
