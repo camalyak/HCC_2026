@@ -15,6 +15,7 @@ pv <- round(100 * attr(pca, "percentVar"))
 
 p <- ggplot(pca, aes(PC1, PC2, color = Type, shape = Batch)) +
   geom_point(size = 3) +
+  scale_color_manual(values = c("black", "red")) +
   xlab(paste0("PC1: ", pv[1], "%")) + ylab(paste0("PC2: ", pv[2], "%")) +
   theme_bw()
 
@@ -22,6 +23,7 @@ ggsave("figures/pca/pca_type_batch_group.png", plot = p, width = 7, height = 5, 
 
 p2 <- ggplot(pca, aes(PC1, PC2, color = ASO, shape = Batch)) +
   geom_point(size = 3) +
+  scale_color_manual(values = c("black", "red")) +
   facet_wrap(~ Type) +
   theme_bw()
 
