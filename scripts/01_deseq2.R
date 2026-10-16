@@ -247,7 +247,6 @@ fit_tissue <- function(tis) {
 }
 
 fits <- list(NonTumor = fit_tissue("NonTumor"), Tumor = fit_tissue("Tumor"))
-<<<<<<< HEAD
 
 # all 6 pairwise contrasts per tissue
 res_within <- lapply(fits, function(f) {
@@ -344,9 +343,6 @@ norm_wide <- data.frame(
 write.csv(norm_wide, "data/all_genes_normalized_counts.csv", row.names = FALSE)
 
 
-
-=======
->>>>>>> 8f0ff820984274e8cc1bb67fb7778f8516e5958b
 
 # all 6 pairwise contrasts per tissue
 res_within <- lapply(fits, function(f) {

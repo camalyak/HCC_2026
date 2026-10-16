@@ -1,0 +1,13 @@
+"tissue","contrast","padj_0.05","padj_all_0.05"
+"NonTumor","NonTumor_Chow_ABAT_vs_NonTumor_Chow_Control",137,33
+"NonTumor","NonTumor_HFD_Control_vs_NonTumor_Chow_Control",434,126
+"NonTumor","NonTumor_HFD_ABAT_vs_NonTumor_Chow_Control",318,34
+"NonTumor","NonTumor_HFD_Control_vs_NonTumor_Chow_ABAT",259,134
+"NonTumor","NonTumor_HFD_ABAT_vs_NonTumor_Chow_ABAT",101,28
+"NonTumor","NonTumor_HFD_ABAT_vs_NonTumor_HFD_Control",236,76
+"Tumor","Tumor_Chow_ABAT_vs_Tumor_Chow_Control",105,87
+"Tumor","Tumor_HFD_Control_vs_Tumor_Chow_Control",1166,207
+"Tumor","Tumor_HFD_ABAT_vs_Tumor_Chow_Control",117,8
+"Tumor","Tumor_HFD_Control_vs_Tumor_Chow_ABAT",135,22
+"Tumor","Tumor_HFD_ABAT_vs_Tumor_Chow_ABAT",10,4
+"Tumor","Tumor_HFD_ABAT_vs_Tumor_HFD_Control",4,1
