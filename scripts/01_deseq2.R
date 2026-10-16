@@ -247,6 +247,7 @@ fit_tissue <- function(tis) {
 }
 
 fits <- list(NonTumor = fit_tissue("NonTumor"), Tumor = fit_tissue("Tumor"))
+<<<<<<< HEAD
 
 # all 6 pairwise contrasts per tissue
 res_within <- lapply(fits, function(f) {
@@ -344,4 +345,84 @@ write.csv(norm_wide, "data/all_genes_normalized_counts.csv", row.names = FALSE)
 
 
 
+=======
+>>>>>>> 8f0ff820984274e8cc1bb67fb7778f8516e5958b
 
+# all 6 pairwise contrasts per tissue
+res_within <- lapply(fits, function(f) {
+  prs <- combn(levels(f$dds$Group), 2, simplify = FALSE)
+  setNames(
+    lapply(prs, function(p) results(f$dds, contrast = c("Group", p[2], p[1]))),
+    sapply(prs, function(p) paste0(p[2], "_vs_", p[1]))
+  )
+})
+
+# optional Bonferroni across all within-tissue contrasts (6 x 2 = 12)
+n_contrasts <- sum(lengths(res_within))
+
+# write CSVs
+for (tis in names(fits)) {
+  # omnibus
+  write.csv(annotate_results(fits[[tis]]$omni, fits[[tis]]$dds),
+            paste0("data/within_", tis, "_omnibus.csv"), row.names = FALSE)
+  
+  # pairwise
+  for (nm in names(res_within[[tis]])) {
+    r <- res_within[[tis]][[nm]]
+    r$padj_all <- pmin(r$padj * n_contrasts, 1)
+    res_within[[tis]][[nm]] <- r
+    write.csv(annotate_results(r, fits[[tis]]$dds),
+              paste0("data/within_", nm, ".csv"), row.names = FALSE)
+  }
+}
+
+# how many genes are significant in each contrast?
+sig_summary <- bind_rows(lapply(names(res_within), function(tis) {
+  data.frame(
+    tissue        = tis,
+    contrast      = names(res_within[[tis]]),
+    padj_0.05     = sapply(res_within[[tis]], function(r) sum(r$padj < 0.05, na.rm = TRUE)),
+    padj_all_0.05 = sapply(res_within[[tis]], function(r) sum(r$padj_all < 0.05, na.rm = TRUE)),
+    row.names = NULL
+  )
+}))
+sig_summary
+write.csv(sig_summary, "data/within_significance_summary.csv", row.names = FALSE)
+
+
+
+
+# check the pairing first
+table(cd_all$Mouse, cd_all$Type)
+
+paired_res <- list()
+
+for (d in c("Chow", "HFD")) for (a in c("Control", "ABAT")) {
+  nm <- paste(d, a, sep = "_")
+  in_cond <- cd_all$Diet == d & cd_all$ASO == a
+  
+  tab  <- table(droplevels(cd_all$Mouse[in_cond]), cd_all$Type[in_cond])
+  both <- rownames(tab)[rowSums(tab > 0) == 2]     # mice with tumor AND non-tumor
+  keep <- in_cond & cd_all$Mouse %in% both
+  
+  cd <- cd_all[keep, ]
+  cd$Mouse <- droplevels(cd$Mouse)
+  cd$Type  <- factor(cd$Type, levels = c("NonTumor", "Tumor"))
+  
+  sub <- DESeqDataSetFromMatrix(raw[, keep], cd, design = ~ Mouse + Type)
+  mcols(sub) <- DataFrame(ensembl_ids)
+  sub <- DESeq(sub)
+  
+  r <- results(sub, contrast = c("Type", "Tumor", "NonTumor"))
+  paired_res[[nm]] <- r
+  cat(nm, ":", length(both), "paired mice\n")
+  
+  write.csv(annotate_results(r, sub),
+            paste0("data/paired_tumor_v_nontumor_", nm, ".csv"), row.names = FALSE)
+}
+
+# significant genes per condition
+data.frame(
+  condition = names(paired_res),
+  padj_0.05 = sapply(paired_res, function(r) sum(r$padj < 0.05, na.rm = TRUE))
+)
